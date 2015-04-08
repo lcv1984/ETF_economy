@@ -24,27 +24,30 @@ def get_etf_df(fname):
 
     return df
 
-def get_time_series(df,etfname):
-
-#print list of unique countries
-print pd.unique(etfs['country'])
+def get_time_series(df,etfname,type_return="index"):
 
 #now plot one of index_total_return, nav_total_return, marketprice_total_return
 #as function of time for a given country
-country = 'Japan'
+    dfsub = df[df['country'] == etfname].sort('date',ascending=True)
 
-dfsub = stocks[stocks['country'] == country].sort('date',ascending=True)
+    x = np.array(dfsub['date'])
+    if type_return == "index":
+        y = np.array(dfsub['index_total_return'])
+    elif type_return == "nav":
+        y = np.array(dfsub['nav_total_return']) 
+    elif type_return == "marketprice":
+        y = np.array(dfsub['marketprice_total_return'])
 
-print dfsub.head(5)
-
-x = np.array(dfsub['date'])
-y = np.array(dfsub['index_total_return'])
-
-datapath = os.getenv('HOME')+'/repos/stockindexcountry/data/'
+    return (x,y)
 
 #get stock data
+datapath = os.getenv('HOME')+'/repos/ETF_economy/data/'
+fname    = datapath+'ishares_country_data.csv'
+etfs     = get_etf_df(fname)
 
-stocks = pd.read_csv(datapath+'ishares_country_data.csv',sep=',',)
+print pd.unique(etfs['country'])
 
-plt.plot(x,y)
+t, y = get_time_series(etfs,'Chile')
+
+plt.plot(t,y)
 plt.show()
