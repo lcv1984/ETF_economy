@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
 from statsmodels.tsa.seasonal import seasonal_decompose
+import seaborn as sns
+
 
 def to_decimal_date(x):
 
@@ -94,11 +96,17 @@ def get_econ_indicators(df_econ,verbose=False):
 
     return indicator_dict
 
-def compare_two_indicators(df_econ,country,indicators,norm=True,plot=False):
-    for i,x in indicators.items():
-        print i,x
-    col1 = int(raw_input('>Index for first indicator to compare:'))
-    col2 = int(raw_input('>Index for first indicator to compare:'))
+def compare_two_indicators(df_econ,country,indicators,norm=True,plot=False,idx=-1):
+    if idx == -1:
+        for i,x in indicators.items():
+            print i,x
+        col1 = int(raw_input('>Index for first indicator to compare:'))
+        col2 = int(raw_input('>Index for first indicator to compare:'))
+    elif len(idx) == 2:
+        col1 = idx[0]
+        col2 = idx[1]
+    else:
+        raise ValueError
     t1,y1 = get_time_series_econ(df_econ,country,indicators[col1])
     t2,y2 = get_time_series_econ(df_econ,country,indicators[col2])
     #now scale the two time series
@@ -111,14 +119,23 @@ def compare_two_indicators(df_econ,country,indicators,norm=True,plot=False):
         plt.plot(t1,y1,'bo',ls='-',lw=2)
         plt.plot(t2,y2,'ro',ls='-',lw=2)
         plt.show()
+    else:
+        pass
     #now scale the two time series
-    return least_squares_distance(y1,y2)
+    return (t1,y1,y2,squared_distance(y1,y2))
 
 def normalize_ts(y):
     return (y - min(y))/(max(y) - min(y))
 
-def least_squares_distance(y1,y2):
-    return np.sqrt(np.sum((y1-y2)**2))
+def squared_distance(y1,y2):
+    #returns sum of squared distances between two time series,
+    #after pruning nans
+    mask = np.isfinite( y1-y2 )
+    delta = y1[mask] - y2[mask]
+    if len(delta) >= 1:
+        return len(delta),np.sqrt(np.sum(delta**2))
+    else:
+        return 0,-1
 
 #get stock data
 etfs     = get_etf_df()
@@ -129,9 +146,9 @@ gdp_cur, gdp_growth, inflation = get_econ_data()
 
 wb_indicators = get_econ_indicators(gdp_cur,verbose=True)
 
-res = compare_two_indicators(gdp_cur,country,wb_indicators,norm=True,plot=True)
+#res = compare_two_indicators(gdp_cur,country,wb_indicators,norm=True,plot=True)
 
-print res
+#print res
 
 t1, y1 = get_time_series_etf(etfs,country)
 t1 = to_decimal_date(t1)
@@ -139,7 +156,11 @@ y1_quarter = pd.stats.moments.rolling_mean(y1,window=3)
 
 t2, y2 = get_time_series_econ(gdp_cur,country)
 
-y2s = pd.Series(y2,index=t2)
+for i in range(len(wb_indicators)):
+    for j in range(i,len(wb_indicators)):
+        t,y_i,y_j,res = compare_two_indicators(gdp_cur,country,wb_indicators,
+            norm=True,plot=False,idx=[i,j])
+        print i,',',j,',',res
 
 #res = seasonal_decompose(y2s)
 
