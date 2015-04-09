@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 def to_decimal_date(x):
 
@@ -90,49 +91,59 @@ def get_econ_indicators(df_econ,verbose=False):
     indicator_dict = {}
     for i,x in enumerate(indicators):
         indicator_dict[i] = x
-        print i,x
 
     return indicator_dict
 
-def compare_two_indicators(df_econ,country,col1,col2):
-    t1,y1 = get_time_series_econ(df_econ,country,col1)
-    t2,y2 = get_time_series_econ(df_econ,country,col2)
+def compare_two_indicators(df_econ,country,indicators,norm=True,plot=False):
+    for i,x in indicators.items():
+        print i,x
+    col1 = int(raw_input('>Index for first indicator to compare:'))
+    col2 = int(raw_input('>Index for first indicator to compare:'))
+    t1,y1 = get_time_series_econ(df_econ,country,indicators[col1])
+    t2,y2 = get_time_series_econ(df_econ,country,indicators[col2])
     #now scale the two time series
-    y1scaled = normalize_ts(y1)
-    y2scaled = normalize_ts(y2)
-
-def plot_two_indicators(df_econ,country,col1,col2,norm=False):
-    t1,y1 = get_time_series_econ(df_econ,country,col1)
-    t2,y2 = get_time_series_econ(df_econ,country,col2)
     if norm == True:
         y1 = normalize_ts(y1)
         y2 = normalize_ts(y2)
     else:
         pass
-    plt.plot(t1,y1,'bo',ls='-',lw=2)
-    plt.plot(t2,y2,'ro',ls='-',lw=2)
-    plt.show()
+    if plot == True:
+        plt.plot(t1,y1,'bo',ls='-',lw=2)
+        plt.plot(t2,y2,'ro',ls='-',lw=2)
+        plt.show()
+    #now scale the two time series
+    return least_squares_distance(y1,y2)
 
 def normalize_ts(y):
     return (y - min(y))/(max(y) - min(y))
 
+def least_squares_distance(y1,y2):
+    return np.sqrt(np.sum((y1-y2)**2))
 
 #get stock data
 etfs     = get_etf_df()
-country  = 'Peru'
+country  = 'Japan'
 
 #get economy data
 gdp_cur, gdp_growth, inflation = get_econ_data()
 
 wb_indicators = get_econ_indicators(gdp_cur,verbose=True)
 
-plot_two_indicators(gdp_cur,country,wb_indicators[7],wb_indicators[8],norm=True)
+res = compare_two_indicators(gdp_cur,country,wb_indicators,norm=True,plot=True)
+
+print res
 
 t1, y1 = get_time_series_etf(etfs,country)
 t1 = to_decimal_date(t1)
 y1_quarter = pd.stats.moments.rolling_mean(y1,window=3)
 
 t2, y2 = get_time_series_econ(gdp_cur,country)
+
+y2s = pd.Series(y2,index=t2)
+
+#res = seasonal_decompose(y2s)
+
+#print type(res)
 
 plt.plot(t1,y1,'bo',ls='-',lw=2)
 plt.plot(t1,y1_quarter,'gs',ls='-',lw=2)
