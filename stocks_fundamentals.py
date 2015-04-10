@@ -57,6 +57,22 @@ def get_time_series_etf(df,etfname,type_return="index"):
 
     return (t,y)
 
+
+def downsample_series_etf(tin,yin):
+    t = to_decimal_date(tin)
+    tout = np.unique(t.astype(int)).astype(float)
+    yout = np.zeros(len(tout))
+    for iyear,year in enumerate(tout):
+        mask = (np.abs(t-year) <= 0.5) & (np.isnan(yin) == False)
+        print mask
+        ytmp = yin[mask]
+        if len(ytmp) >= 2:
+            print ytmp
+            yout[iyear] = np.mean(ytmp) / len(ytmp)
+        else:
+            yout[iyear] = np.nan
+    return tout, yout
+
 def get_econ_data():
 
     datapath = os.getenv('HOME')+'/repos/ETF_economy/data/'
@@ -151,22 +167,29 @@ wb_indicators = get_econ_indicators(gdp_cur,verbose=True)
 #print res
 
 t1, y1 = get_time_series_etf(etfs,country)
-t1 = to_decimal_date(t1)
-y1_quarter = pd.stats.moments.rolling_mean(y1,window=3)
+t1out, y1out = downsample_series_etf(t1,y1)
+y1out = normalize_ts(y1out)
+t1_year = to_decimal_date(t1)
+#y1_quarter = pd.stats.moments.rolling_mean(y1,window=3)
 
 t2, y2 = get_time_series_econ(gdp_cur,country)
+y2 = normalize_ts(y2)
+
+f = open('econvar_similarity.csv','w')
 
 for i in range(len(wb_indicators)):
     for j in range(i,len(wb_indicators)):
         t,y_i,y_j,res = compare_two_indicators(gdp_cur,country,wb_indicators,
             norm=True,plot=False,idx=[i,j])
-        print i,',',j,',',res
+        f.write('{0},{1},{2},{3}\n'.format(i,j,res[0],res[1]))
+
+f.close()
 
 #res = seasonal_decompose(y2s)
 
 #print type(res)
 
-plt.plot(t1,y1,'bo',ls='-',lw=2)
-plt.plot(t1,y1_quarter,'gs',ls='-',lw=2)
+plt.plot(t1out,y1out,'bo',ls='-',lw=2)
+#plt.plot(t1,y1_quarter,'gs',ls='-',lw=2)
 plt.plot(t2,y2,'ro',ls='-',lw=2)
 plt.show()
