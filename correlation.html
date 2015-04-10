@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en"> 
+    <head>
+        <meta charset="utf-8">
+        <title>Similarity of Economic Variables</title>
+        <!-- Bootstrap -->
+        <link href="css/bootstrap.css" rel="stylesheet">
+        <!-- Custom css -->
+        <link rel="stylesheet" type="text/css" href="css/correlation.css">
+
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="js/bootstrap.js"></script>
+
+        <!-- Load d3.js -->
+        <script src="js/d3.js" charset="utf-8"></script>
+
+    </head>
+
+    <body>
+
+        <div class="container">
+            <div class="rows">
+                <div class="col-sm-11 col-sm-offset-1">
+                    <h1 class="text-left"> Similarity of Economic Variables </h1>
+                </div>
+            </div>
+            <div class="rows">
+                <div class="col-sm-11 col-sm-offset-1">
+                    <h3 class="text-left"> Click on any of the boxes </h3>
+                </div>
+            </div>
+        
+
+        <!--To be implemented next - 03/01/2015 
+            <form id="controls">
+            <div class="text">
+                <ul id="population">
+                <li><label><input checked="checked" type="radio">Milky Way</label></li>
+                <li><label><input type="radio">Andromeda</label></li>   
+                </ul>
+            </div>
+        </form>    -->
+
+        <!--Load visualization script-->
+            <div class="rows">
+                <div class="col-sm-6 col-sm-offset-1" id="heatmap">
+                    <script src="d3/correlation.js" ></script>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>
