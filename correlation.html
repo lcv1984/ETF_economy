@@ -32,26 +32,37 @@
                     <h3 class="text-left"> Click on any of the boxes </h3>
                 </div>
             </div>
-
-
-        <!--To be implemented next - 03/01/2015
-            <form id="controls">
-            <div class="text">
-                <ul id="population">
-                <li><label><input checked="checked" type="radio">Milky Way</label></li>
-                <li><label><input type="radio">Andromeda</label></li>
-                </ul>
-            </div>
-        </form>    -->
-
-        <!--Load visualization script-->
-            <div class="rows">
-                <div class="col-sm-5" id="heatmap">
-                </div>
-                <div class="col-sm-5 col-sm-offset-2" id="timeseries">
-                </div>
-            </div>
         </div>
+
+        <div class="container">
+          <div class="rows">
+            <div class="col-sm-6 col-sm-offset-0">
+              <div class="dropdown">
+                <button class="btn btn-default dropdown-toggle"
+                  type="button" id="dropdownMenu1" data-toggle="dropdown"
+                  aria-expanded="true">
+                    Dropdown
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
+                  <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+                </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="container">
+            <div class="rows">
+              <div class="col-sm-5" id="heatmap"></div>
+              <div class="col-sm-5 col-sm-offset-2" id="timeseries"></div>
+            </div>
+          </div>
+      <!--Load visualization script-->
+
         <script src="d3/correlation.js" ></script>
 
     </body>
