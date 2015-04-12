@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
-from statsmodels.tsa.seasonal import seasonal_decompose
-import seaborn as sns
+#from statsmodels.tsa.seasonal import seasonal_decompose
+import json
 
 
 def to_decimal_date(x):
@@ -86,9 +86,9 @@ def get_econ_data():
     df1.rename(columns=lambda x: x.strip())
     df2.rename(columns=lambda x: x.strip())
     df3.rename(columns=lambda x: x.strip())
-    df1.rename(columns={'Country Name': 'country'},inplace=True)
-    df2.rename(columns={'Country Name': 'country'},inplace=True)
-    df3.rename(columns={'Country Name': 'country'},inplace=True)
+    #df1.rename(columns={'Country': 'country'},inplace=True)
+    df2.rename(columns={'Country Name': 'Country'},inplace=True)
+    df3.rename(columns={'Country Name': 'Country'},inplace=True)
 
     return (df1,df2,df3)
 
@@ -96,7 +96,7 @@ def get_time_series_econ(df,etfname,type_return="GDP growth (annual %)"):
 
 #now plot one of index_total_return, nav_total_return, marketprice_total_return
 #as function of time for a given country
-    dfsub = df[(df['country'] == etfname) & (df.iloc[:,0] == type_return)]
+    dfsub = df[(df['Country'] == etfname) & (df.iloc[:,0] == type_return)]
 
     t = np.array(range(2000,2013))
     y = np.array(dfsub.iloc[:,4:])
@@ -111,6 +111,10 @@ def get_econ_indicators(df_econ,verbose=False):
         indicator_dict[i] = x
 
     return indicator_dict
+
+def get_econ_countries(df_econ,verbose=False):
+    country_list = pd.unique(df_econ.ix[:,2]).tolist()
+    return country_list
 
 def compare_two_indicators(df_econ,country,indicators,norm=True,plot=False,idx=-1):
     if idx == -1:
@@ -162,6 +166,12 @@ gdp_cur, gdp_growth, inflation = get_econ_data()
 
 wb_indicators = get_econ_indicators(gdp_cur,verbose=True)
 
+country_list = get_econ_countries(gdp_cur,verbose=True)
+
+print country_list
+raise ValueError
+
+
 #res = compare_two_indicators(gdp_cur,country,wb_indicators,norm=True,plot=True)
 
 #print res
@@ -175,15 +185,47 @@ t1_year = to_decimal_date(t1)
 t2, y2 = get_time_series_econ(gdp_cur,country)
 y2 = normalize_ts(y2)
 
-f = open('econvar_similarity.csv','w')
+#print similarity scores for the different variables
 
-for i in range(len(wb_indicators)):
-    for j in range(i,len(wb_indicators)):
-        t,y_i,y_j,res = compare_two_indicators(gdp_cur,country,wb_indicators,
-            norm=True,plot=False,idx=[i,j])
-        f.write('{0},{1},{2},{3}\n'.format(i,j,res[0],res[1]))
+country_list = ['Chile','Peru']
 
-f.close()
+rows = []
+
+for icountry,country in enumerate(country_list):
+    for i in range(len(wb_indicators)):
+        for j in range(i,len(wb_indicators)):
+            tmpdict = {}
+            tmpdict['index1'] = i
+            tmpdict['index2'] = j
+            tmpdict['property1'] = wb_indicators[i]
+            tmpdict['property2'] = wb_indicators[j]
+            t,y_i,y_j,res = compare_two_indicators(gdp_cur,country,wb_indicators,
+                norm=True,plot=False,idx=[i,j])
+            tmpdict['npoints'] = res[0]
+            tmpdict['simscore'] = res[1]
+            rows.append(tmpdict)
+
+with open('econvar_similarity.csv','w') as f:
+    json.dump(rows, f)
+
+#with open('econvar_similarity.json','w') as f:
+#    json.dump(tmpdict, f)
+
+
+#print time series for input into js
+rows = []
+for icountry,country in enumerate(country_list):
+    for i in range(len(wb_indicators)):
+        tmpdict = {}
+        tmpdict['country'] = country
+        t1,y1 = get_time_series_econ(gdp_cur,country,wb_indicators[i])
+        tmpdict['years'] = t1.tolist()
+        tmpdict['property'] = wb_indicators[i]
+        tmpdict['values'] = y1.tolist()
+        rows.append(tmpdict)
+
+with open('econvar_timeseries.json','w') as f:
+    json.dump(rows, f)
 
 #res = seasonal_decompose(y2s)
 
