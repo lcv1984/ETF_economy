@@ -166,11 +166,11 @@ gdp_cur, gdp_growth, inflation = get_econ_data()
 
 wb_indicators = get_econ_indicators(gdp_cur,verbose=True)
 
-country_list = get_econ_countries(gdp_cur,verbose=True)
+country_list_1 = get_econ_countries(gdp_cur,verbose=True)
 
-print country_list
-raise ValueError
+country_list_2 = pd.unique(etfs.country)
 
+country_list = [x for x in country_list_1 if x in country_list_2]
 
 #res = compare_two_indicators(gdp_cur,country,wb_indicators,norm=True,plot=True)
 
@@ -186,8 +186,6 @@ t2, y2 = get_time_series_econ(gdp_cur,country)
 y2 = normalize_ts(y2)
 
 #print similarity scores for the different variables
-
-country_list = ['Chile','Peru']
 
 rows = []
 
