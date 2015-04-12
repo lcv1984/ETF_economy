@@ -10,10 +10,26 @@ var country = "Peru"
 
 d3.json("../data/econvar_similarity.json", function(error1, data1) {
   d3.json("../data/econvar_timeseries.json", function(error2, data2) {
+    //Import data to JS objects
     simvals = data1;
     series  = data2;
-    console.log(error1);
-    console.log(error2);
+
+    //Get unique list of countries and properties
+
+    var country_list = {};
+    for (var i = 0; i < simvals.length; i++) {
+      country_list[simvals[i].country] = 1
+    }
+
+    var property_list = {};
+    for (var i = 0; i < series.length; i++) {
+      property_list[series[i].property] = 1
+    }
+
+    subsimvals = simvals.filter(filterByCountry);
+    subseries = series.filter(filterByCountry);
+
+    //Filter objects by wanted country and property to be compared
 
     function filterByCountry(obj) {
       if (obj.country == country) {
@@ -23,9 +39,7 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
       }
     }
 
-    subsimvals = simvals.filter(filterByCountry);
-
-    console.log(subsimvals);
+    console.log(property_list);
 
     nvars = d3.max(simvals, function(d) { return parseInt(d.index1); }) + 1;
     var dx = width / nvars;
