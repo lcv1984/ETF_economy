@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
+import io
 #from statsmodels.tsa.seasonal import seasonal_decompose
 import json
 
@@ -17,6 +19,15 @@ def to_decimal_date(x):
         z[i] = y + (m/12.) + (d/30.)
 
     return z
+
+def clean_list(inarr,nan_val = 'null'):
+    #outarr = np.copy(inarr)
+    #outarr[np.isnan(inarr)] = nan_val
+    outlist = list(inarr)
+    for iel,el in enumerate(outlist):
+        if np.isnan(el):
+            outlist[iel] = nan_val
+    return outlist
 
 def get_etf_df():
 
@@ -47,13 +58,13 @@ def get_time_series_etf(df,etfname,type_return="index"):
 #as function of time for a given country
     dfsub = df[df['country'] == etfname].sort('date',ascending=True)
 
-    t = np.array(dfsub['date'])
+    t = np.array(dfsub['date'].values)
     if type_return == "index":
-        y = np.array(dfsub['index_total_return'])
+        y = np.array(dfsub['index_total_return'].values)
     elif type_return == "nav":
-        y = np.array(dfsub['nav_total_return'])
+        y = np.array(dfsub['nav_total_return'].values)
     elif type_return == "marketprice":
-        y = np.array(dfsub['marketprice_total_return'])
+        y = np.array(dfsub['marketprice_total_return'].values)
 
     return (t,y)
 
@@ -64,7 +75,7 @@ def downsample_series_etf(tin,yin):
     yout = np.zeros(len(tout))
     for iyear,year in enumerate(tout):
         mask = (np.abs(t-year) <= 0.5) & (np.isnan(yin) == False)
-        print mask
+        #print mask
         ytmp = yin[mask]
         if len(ytmp) >= 2:
             print ytmp
@@ -172,6 +183,8 @@ country_list_2 = pd.unique(etfs.country)
 
 country_list = [x for x in country_list_1 if x in country_list_2]
 
+country_list = ['Peru','Chile']
+
 #res = compare_two_indicators(gdp_cur,country,wb_indicators,norm=True,plot=True)
 
 #print res
@@ -203,8 +216,10 @@ for icountry,country in enumerate(country_list):
             tmpdict['simscore'] = res[1]
             rows.append(tmpdict)
 
-with open('econvar_similarity.csv','w') as f:
-    json.dump(rows, f)
+with io.open('data/econvar_similarity.json','w',encoding='utf-8') as f:
+    data = json.dumps(rows, ensure_ascii = False)
+    f.write(unicode(data))
+
 
 #with open('econvar_similarity.json','w') as f:
 #    json.dump(tmpdict, f)
@@ -217,13 +232,17 @@ for icountry,country in enumerate(country_list):
         tmpdict = {}
         tmpdict['country'] = country
         t1,y1 = get_time_series_econ(gdp_cur,country,wb_indicators[i])
-        tmpdict['years'] = t1.tolist()
-        tmpdict['property'] = wb_indicators[i]
-        tmpdict['values'] = y1.tolist()
-        rows.append(tmpdict)
+        t1str = str(t1)
+        nyears = len(t1str)
+        for j in range(nyears):
+            tmpdict['years'] = clean_list(t1)
+            tmpdict['property'] = wb_indicators[i]
+            tmpdict['values'] = clean_list(y1)
+            rows.append(tmpdict)
 
-with open('econvar_timeseries.json','w') as f:
-    json.dump(rows, f)
+with io.open('data/econvar_timeseries.json','w',encoding='utf-8') as f:
+    data = json.dumps(rows, ensure_ascii = False)
+    f.write(unicode(data)) #fix a bug in utf-8 encoding in json package
 
 #res = seasonal_decompose(y2s)
 
