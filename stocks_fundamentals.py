@@ -206,6 +206,7 @@ for icountry,country in enumerate(country_list):
     for i in range(len(wb_indicators)):
         for j in range(i,len(wb_indicators)):
             tmpdict = {}
+            tmpdict['country'] = country
             tmpdict['index1'] = i
             tmpdict['index2'] = j
             tmpdict['property1'] = wb_indicators[i]
