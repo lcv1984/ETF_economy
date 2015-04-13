@@ -141,6 +141,8 @@ def compare_two_indicators(df_econ,country,indicators,norm=True,plot=False,idx=-
     t1,y1 = get_time_series_econ(df_econ,country,indicators[col1])
     t2,y2 = get_time_series_econ(df_econ,country,indicators[col2])
     #now scale the two time series
+    if len(y1) != len(y2):
+        raise ValueError
     if norm == True:
         y1 = normalize_ts(y1)
         y2 = normalize_ts(y2)
@@ -153,18 +155,27 @@ def compare_two_indicators(df_econ,country,indicators,norm=True,plot=False,idx=-
     else:
         pass
     #now scale the two time series
+    if indicators[col1] == "Foreign direct investment, net (BoP, current US$)":
+        print y1,y2
     return (t1,y1,y2,squared_distance(y1,y2))
 
 def normalize_ts(y):
-    return (y - min(y))/(max(y) - min(y))
+    mask = np.isfinite(y)
+    if len(y[mask]) >= 2:
+        return (y - min(y[mask])) / (max(y[mask] - min(y[mask])))
+    elif len(y[mask]) < 2:
+        tmp = np.zeros(len(y))
+        tmp[:] = np.nan
+        return tmp
 
 def squared_distance(y1,y2):
     #returns sum of squared distances between two time series,
     #after pruning nans
     mask = np.isfinite( y1-y2 )
     delta = y1[mask] - y2[mask]
+    print delta
     if len(delta) >= 1:
-        return len(delta),np.sqrt(np.sum(delta**2))
+        return len(delta),np.sqrt(np.sum(delta**2))/len(delta)
     else:
         return 0,-1
 
@@ -183,7 +194,7 @@ country_list_2 = pd.unique(etfs.country)
 
 country_list = [x for x in country_list_1 if x in country_list_2]
 
-country_list = ['Peru','Chile']
+country_list = ['Chile','Peru']
 
 #res = compare_two_indicators(gdp_cur,country,wb_indicators,norm=True,plot=True)
 
