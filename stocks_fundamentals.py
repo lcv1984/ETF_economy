@@ -172,10 +172,10 @@ def squared_distance(y1,y2):
     #returns sum of squared distances between two time series,
     #after pruning nans
     mask = np.isfinite( y1-y2 )
-    delta = y1[mask] - y2[mask]
+    delta = np.abs(y1[mask] - y2[mask])
     print delta
     if len(delta) >= 1:
-        return len(delta),np.sqrt(np.sum(delta**2))/len(delta)
+        return len(delta),(np.sum(delta))/len(delta)
     else:
         return 0,-1
 
@@ -194,7 +194,9 @@ country_list_2 = pd.unique(etfs.country)
 
 country_list = [x for x in country_list_1 if x in country_list_2]
 
-country_list = ['Chile','Peru']
+countr_list = ["United States","Japan","Peru","Germany","Brazil","Mexico","Argentina"]
+
+#country_list = ['Chile','Peru']
 
 #res = compare_two_indicators(gdp_cur,country,wb_indicators,norm=True,plot=True)
 
@@ -228,10 +230,9 @@ for icountry,country in enumerate(country_list):
             tmpdict['simscore'] = res[1]
             rows.append(tmpdict)
 
-with io.open('data/econvar_similarity.json','w',encoding='utf-8') as f:
-    data = json.dumps(rows, ensure_ascii = False)
+with io.open('data/econvar_similarity.json','a',encoding='utf-8') as f:
+    data = json.dumps(rows, ensure_ascii = False, indent = None)
     f.write(unicode(data))
-
 
 #with open('econvar_similarity.json','w') as f:
 #    json.dump(tmpdict, f)

@@ -98,7 +98,7 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
     d3.select("div.text-property-two")
       .text(function(d) { return subseries2[0].property });
 
-    nvars = d3.max(simvals, function(d) { return parseInt(d.index1); }) + 1;
+    nvars = d3.max(subsimvals, function(d) { return parseInt(d.index1); }) + 1;
     var dx = width / nvars;
     var dy = width / nvars;
 
@@ -108,22 +108,22 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
 
     var yScale = d3.scale.linear()
         .domain(d3.extent(simvals, function(d) { return parseInt(d.index1); }))
-        .range([margin.top,margin.top+height]);
+        .range([margin.top+height,margin.top]);
 
     var zScale = d3.scale.linear()
         .domain(d3.extent(simvals, function(d) { return parseFloat(d.simscore); }))
-        .range(["red","white"]);
+        .range(["red","blue"]);
 
 
-    xScale.domain([xScale.domain()[0],xScale.domain()[1] + 1]);
-    yScale.domain([yScale.domain()[0],yScale.domain()[1] + 1]);
+    xScale.domain([xScale.domain()[0],xScale.domain()[1] + 1 ]);
+    yScale.domain([yScale.domain()[0] - 1 ,yScale.domain()[1] + 0 ]);
     zScale.domain([0,zScale.domain()[1]]);
 
 
     var svg = d3.select("div #heatmap").append("svg")
         .attr("class","svg-heatmap")
-        .attr("width",width + margin.top + margin.bottom)
-        .attr("height",height + margin.left + margin.right)
+        .attr("height",height + margin.top + margin.bottom)
+        .attr("width",width + margin.left + margin.right)
 
     svg.append("g")
         .attr("transform","translate(" + margin.left.toString() + "," + margin.top.toString() + ")");
