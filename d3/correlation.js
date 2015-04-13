@@ -128,7 +128,7 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
     svg.append("g")
         .attr("transform","translate(" + margin.left.toString() + "," + margin.top.toString() + ")");
 
-    svg.selectAll(".tile")
+    svg.selectAll("rect.tile")
         .data(subsimvals)
         .enter().append("rect")
         .attr("class", "tile")
@@ -138,11 +138,13 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
         .attr("height", dy)
         .style("fill", function(d) {
           if (d.simscore < 0) {
-            return "black";
+            return "white";
           } else {
           return zScale(d.simscore);
           }
-        });
+        })
+        .attr("xval", function(d) { return d.index1; } )
+        .attr("yval", function(d) { return d.index2; } );
 
     var xAxis = d3.svg.axis()
         .scale(xScale)
@@ -193,24 +195,31 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
         }
     }
 
-    //Normalize y-axes for time series
-    var xymax1 = d3.extent(xytmp1, function(d) { return d[1]; });
-    var xymax2 = d3.extent(xytmp2, function(d) { return d[1]; });
+    if (xytmp1.length <= 0 || xytmp2.length <=0) {
 
-    var x1scale = d3.scale.linear().domain([xymax1[0],xymax1[1]])
-        .range([0,1]);
-    var x2scale = d3.scale.linear().domain([xymax2[0],xymax2[1]])
-        .range([0,1]);
-
-    for (var i = 0; i < xytmp1.length; i++) {
-        xytmp1[i][1] = x1scale(xytmp1[i][1]);
-    }
-    for (var i = 0; i < xytmp2.length; i++) {
-        xytmp2[i][1] = x2scale(xytmp2[i][1]);
     }
 
+    else
 
-    svg2.selectAll("circle.prop1")
+    {
+
+      //Normalize y-axes for time series
+      var xymax1 = d3.extent(xytmp1, function(d) { return d[1]; });
+      var xymax2 = d3.extent(xytmp2, function(d) { return d[1]; });
+
+      var x1scale = d3.scale.linear().domain([xymax1[0],xymax1[1]])
+        .range([0,1]);
+      var x2scale = d3.scale.linear().domain([xymax2[0],xymax2[1]])
+        .range([0,1]);
+
+        for (var i = 0; i < xytmp1.length; i++) {
+          xytmp1[i][1] = x1scale(xytmp1[i][1]);
+        }
+        for (var i = 0; i < xytmp2.length; i++) {
+          xytmp2[i][1] = x2scale(xytmp2[i][1]);
+        }
+
+        svg2.selectAll("circle.prop1")
         .data(xytmp1)
         .enter().append("circle")
         .attr("class","prop1")
@@ -220,7 +229,7 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
         .style("fill", "rgba(83, 213, 77, 1.0)");
 
 
-    svg2.selectAll("circle.prop2")
+        svg2.selectAll("circle.prop2")
         .data(xytmp2)
         .enter().append("circle")
         .attr("class","prop2")
@@ -229,19 +238,19 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
         .attr("cy", function(d) { return yScaleTS(d[1]); })
         .style("fill", "rgba(78, 139, 213, 1.0)");
 
-    var xAxisTS = d3.svg.axis()
+        var xAxisTS = d3.svg.axis()
         .scale(xScaleTS)
         .ticks(6)
         .tickSize(5)
         .orient("bottom");
 
-    var yAxisTS = d3.svg.axis()
+        var yAxisTS = d3.svg.axis()
         .scale(yScaleTS)
         .ticks(5)
         .tickSize(5)
         .orient("left");
 
-    svg2.append("g")
+        svg2.append("g")
         .attr("class","x axis")
         .attr("transform","translate(0,"+(height+margin.top).toString()+")")
         .call(xAxisTS)
@@ -250,11 +259,12 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
         .attr("y", function(d) { return 30; })
         .text("Time (Year)");
 
-    svg2.append("g")
+        svg2.append("g")
         .attr("class","y axis")
         .attr("transform","translate("+(margin.left).toString()+",0)")
         .call(yAxisTS)
 
+    }
 
     dropdown_countries.selectAll("a.country-list")
       .on("click", function(d) {
@@ -303,7 +313,7 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
 
         svg.selectAll(".tile").data([]).exit().remove();
 
-        svg.selectAll(".tile")
+        svg.selectAll("rect.tile")
             .data(subsimvals)
             .enter().append("rect")
             .attr("class", "tile")
@@ -317,14 +327,17 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
               } else {
               return zScale(d.simscore);
               }
-            });
+            })
+            .attr("xval", function(d) { return d.index1; } )
+            .attr("yval", function(d) { return d.index2; } );
 
-            svg.selectAll(".tile")
-                .on("mouseover", function(d) {
+            svg.selectAll("rect.tile")
+                .on("click", function(d) {
                     d3.select(this)
                       .style("fill", function(d) { return "blue"; });
-                    index1 = xScale.invert(d3.select(this).attr("x"));
-                    index2 = yScale.invert(d3.select(this).attr("y"));
+                    tmpstr = d3.select(this).property("text");
+                    index1 = d3.select(this).attr("xval");
+                    index2 = d3.select(this).attr("yval");
 
                     subseries1 = series.filter(filterByCountryIndex1);
                     subseries2 = series.filter(filterByCountryIndex2);
@@ -391,9 +404,11 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
                 })
                 .on("mouseout", function(d) {
                     d3.select(this)
+                    .attr("width", dx)
+                    .attr("height", dy)
                     .style("fill", function(d) {
                       if (d.simscore < 0) {
-                        return "black";
+                        return "white";
                       } else {
                       return zScale(d.simscore);
                       }
@@ -484,12 +499,13 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
       ////////////////////////////////////////////////////////////////////
 
     //highlight box when mouseover
-    svg.selectAll(".tile")
-        .on("mouseover", function(d) {
+    svg.selectAll("rect.tile")
+        .on("click", function(d) {
             d3.select(this)
-              .style("fill", function(d) { return "blue"; });
-            index1 = xScale.invert(d3.select(this).attr("x"));
-            index2 = yScale.invert(d3.select(this).attr("y"));
+            .style("fill", function(d) { return "green"; });
+            index1 = d3.select(this).attr("xval");
+            index2 = d3.select(this).attr("yval");
+
 
             subseries1 = series.filter(filterByCountryIndex1);
             subseries2 = series.filter(filterByCountryIndex2);
@@ -517,25 +533,37 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
                   }
               }
 
-            //Normalize y-axes for time series
-            xymax1 = d3.extent(xytmp1, function(d) { return d[1]; });
-            xymax2 = d3.extent(xytmp2, function(d) { return d[1]; });
+            if (xytmp1.length <= 0 || xytmp2.length <=0) {
 
-            x1scale = d3.scale.linear().domain([xymax1[0],xymax1[1]])
+              svg2.selectAll("circle.prop1").remove(); //data([]).exit().remove();
+
+              console.log('washere');
+
+            }
+
+            else
+
+            {
+
+              //Normalize y-axes for time series
+              xymax1 = d3.extent(xytmp1, function(d) { return d[1]; });
+              xymax2 = d3.extent(xytmp2, function(d) { return d[1]; });
+
+              x1scale = d3.scale.linear().domain([xymax1[0],xymax1[1]])
                   .range([0,1]);
-            x2scale = d3.scale.linear().domain([xymax2[0],xymax2[1]])
+              x2scale = d3.scale.linear().domain([xymax2[0],xymax2[1]])
                   .range([0,1]);
 
-            for (var i = 0; i < xytmp1.length; i++) {
+              for (var i = 0; i < xytmp1.length; i++) {
                 xytmp1[i][1] = x1scale(xytmp1[i][1]);
-            }
-            for (var i = 0; i < xytmp2.length; i++) {
+              }
+              for (var i = 0; i < xytmp2.length; i++) {
                 xytmp2[i][1] = x2scale(xytmp2[i][1]);
-            }
+              }
 
-            svg2.selectAll("circle").data([]).exit().remove();
+              svg2.selectAll("circle").data([]).exit().remove();
 
-            svg2.selectAll("circle.prop1")
+              svg2.selectAll("circle.prop1")
                 .data(xytmp1)
                 .enter().append("circle")
                 .attr("class","prop1")
@@ -544,7 +572,7 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
                 .attr("cy", function(d) { return yScaleTS(d[1]); })
                 .style("fill", "rgba(83, 213, 77, 1.0)");
 
-            svg2.selectAll("circle.prop2")
+              svg2.selectAll("circle.prop2")
                 .data(xytmp2)
                 .enter().append("circle")
                 .attr("class","prop2")
@@ -552,13 +580,15 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
                 .attr("cx", function(d) { return xScaleTS(d[0]); })
                 .attr("cy", function(d) { return yScaleTS(d[1]); })
                 .style("fill", "rgba(78, 139, 213, 1.0)");
-
+            }
         })
         .on("mouseout", function(d) {
             d3.select(this)
+            .attr("width", dx)
+            .attr("height", dy)
             .style("fill", function(d) {
               if (d.simscore < 0) {
-                return "black";
+                return "white";
               } else {
               return zScale(d.simscore);
               }
