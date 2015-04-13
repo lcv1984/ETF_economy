@@ -16,18 +16,37 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
 
     //Get unique list of countries and properties
 
-    var country_list = {};
+    var country_dict = {};
+    var country_list = [];
     for (var i = 0; i < simvals.length; i++) {
-      country_list[simvals[i].country] = 1
+      if (!country_dict[simvals[i].country]) {
+        country_list.push(simvals[i].country);
+      }
+      country_dict[simvals[i].country] = 1;
     }
 
-    var property_list = {};
+    var property_dict = {};
+    var property_list = [];
     for (var i = 0; i < series.length; i++) {
-      property_list[series[i].property] = 1
+      if (!property_dict[series[i].property]) {
+        property_list.push(series[i].property);
+      }
+      property_dict[series[i].property] = 1;
     }
 
-    subsimvals = simvals.filter(filterByCountry);
-    subseries = series.filter(filterByCountry);
+    var dropdown_countries = d3.select("#drop-down-countries").append("ul")
+      .attr("class","dropdown-menu")
+      .attr("role","menu")
+      .attr("aria-labelledby","dropdownMenu1");
+
+    dropdown_countries.selectAll("li")
+      .data(country_list)
+      .enter()
+      .append("li")
+      .insert("a")
+        .attr("href","#")
+        .text(function(d) { return d; })
+
 
     //Filter objects by wanted country and property to be compared
 
@@ -39,7 +58,8 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
       }
     }
 
-    console.log(property_list);
+    subsimvals = simvals.filter(filterByCountry);
+    subseries = series.filter(filterByCountry);
 
     nvars = d3.max(simvals, function(d) { return parseInt(d.index1); }) + 1;
     var dx = width / nvars;
