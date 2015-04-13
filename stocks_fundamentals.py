@@ -232,14 +232,15 @@ for icountry,country in enumerate(country_list):
     for i in range(len(wb_indicators)):
         tmpdict = {}
         tmpdict['country'] = country
+        tmpdict['property'] = wb_indicators[i]
+        tmpdict['iproperty'] = i
         t1,y1 = get_time_series_econ(gdp_cur,country,wb_indicators[i])
         t1str = str(t1)
         nyears = len(t1str)
-        for j in range(nyears):
-            tmpdict['years'] = clean_list(t1)
-            tmpdict['property'] = wb_indicators[i]
-            tmpdict['values'] = clean_list(y1)
-            rows.append(tmpdict)
+        #for j in range(nyears):
+        tmpdict['years'] = clean_list(t1)
+        tmpdict['values'] = clean_list(y1)
+        rows.append(tmpdict)
 
 with io.open('data/econvar_timeseries.json','w',encoding='utf-8') as f:
     data = json.dumps(rows, ensure_ascii = False)
