@@ -1,12 +1,14 @@
 //Set width and height of bars
-var margin = {top: 30, right: 30, bottom: 30, left: 30}
-var width = 300 - margin.left - margin.right;
-var height= 300 - margin.top - margin.bottom;
+var margin = {top: 20, right: 20, bottom: 20, left: 20}
+var width = 350 - margin.left - margin.right;
+var height= 350 - margin.top - margin.bottom;
 var barPadding = 0.5;
 var simvals;
 var series;
 var subsimvals;
-var country = "Peru"
+var country = "Peru";
+var xprop = 0;
+var yprop = 1;
 
 d3.json("../data/econvar_similarity.json", function(error1, data1) {
   d3.json("../data/econvar_timeseries.json", function(error2, data2) {
@@ -116,6 +118,8 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
         .on("mouseover", function(d) {
             d3.select(this)
               .style("fill", function(d) { return "blue"; });
+            xprop = xScale.invert(d3.select(this).attr("x"));
+            yprop = yScale.invert(d3.select(this).attr("y"));
             var svg2 = d3.select("div #timeseries").append('svg')
               .attr("width",width + margin.top + margin.bottom)
               .attr("height",height + margin.left + margin.right)
