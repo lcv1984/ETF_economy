@@ -31,7 +31,7 @@ def clean_list(inarr,nan_val = 'null'):
 
 def get_etf_df():
 
-    datapath = os.getenv('HOME')+'/repos/ETF_economy/data/'
+    datapath = os.getenv('HOME')+'/repos/ETF_economy/sourcedata/'
     fname    = datapath+'ishares_country_data.csv'
 
     df = pd.read_csv(fname,sep=',',)
@@ -86,7 +86,7 @@ def downsample_series_etf(tin,yin):
 
 def get_econ_data():
 
-    datapath = os.getenv('HOME')+'/repos/ETF_economy/data/'
+    datapath = os.getenv('HOME')+'/repos/ETF_economy/sourcedata/'
     fname1    = datapath+'wb_gdp_current.csv'
     fname2    = datapath+'wb_gdp_growth.csv'
     fname3    = datapath+'wb_inflation_annual.csv'
@@ -193,8 +193,6 @@ country_list_1 = get_econ_countries(gdp_cur,verbose=True)
 country_list_2 = pd.unique(etfs.country)
 
 country_list = [x for x in country_list_1 if x in country_list_2]
-
-countr_list = ["United States","Japan","Peru","Germany","Brazil","Mexico","Argentina"]
 
 #country_list = ['Chile','Peru']
 

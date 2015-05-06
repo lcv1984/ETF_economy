@@ -1,7 +1,7 @@
 //Set width and height of bars
-var margin = {top: 20, right: 20, bottom: 20, left: 30}
+var margin = {top: 20, right: 20, bottom: 30, left: 30}
 var width = 350 - margin.left - margin.right;
-var height= 275 - margin.top - margin.bottom;
+var height= 300 - margin.top - margin.bottom;
 var barPadding = 0.5;
 var simvals;
 var series;
@@ -148,8 +148,14 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
 
     var xAxis = d3.svg.axis()
         .scale(xScale)
-        .ticks(nvars)
+        .ticks(5)
         .tickSize(0);
+
+    var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .ticks(5)
+        .tickSize(0)
+        .orient("left");
 
     svg.append("g")
         .attr("class", "x axis")
@@ -157,8 +163,16 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
         .call(xAxis)
         .append("text")
         .attr("x", function(d) { return width/2.; })
-        .attr("y", function(d) { return 30; })
+        .attr("y", function(d) { return 22; })
         .text("Economic Variable");
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + (margin.left).toString() + ",0)")
+        .call(yAxis)
+        .append("text")
+        .attr("x", function(d) { return width/2.; })
+        .attr("y", function(d) { return 22; })
 
     //Create timeseries svg element (right element)
 
@@ -323,7 +337,7 @@ d3.json("../data/econvar_similarity.json", function(error1, data1) {
             .attr("height", dy)
             .style("fill", function(d) {
               if (d.simscore < 0) {
-                return "black";
+                return "white";
               } else {
               return zScale(d.simscore);
               }
